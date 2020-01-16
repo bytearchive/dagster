@@ -132,7 +132,7 @@ def cluster_exists(cluster_name):
 
 
 @pytest.fixture(scope='session')
-def setup_cluster(cluster_name, cluster_exists):  # pylint: disable=redefined-outer-name
+def setup_cluster(request, cluster_name, cluster_exists):  # pylint: disable=redefined-outer-name
 
     if not IS_BUILDKITE and cluster_exists:
         yield cluster_name
@@ -146,8 +146,9 @@ def setup_cluster(cluster_name, cluster_exists):  # pylint: disable=redefined-ou
             subprocess.check_call(['kind', 'create', 'cluster', '--name', cluster_name])
             yield cluster_name
         finally:
-            # ensure cleanup happens on error or normal exit
-            subprocess.check_call('kind delete cluster --name %s' % cluster_name, shell=True)
+            if not request.config.getoption("--keep-cluster"):
+                # ensure cleanup happens on error or normal exit
+                subprocess.check_call('kind delete cluster --name %s' % cluster_name, shell=True)
 
 
 @pytest.fixture(scope='session')

@@ -24,6 +24,13 @@ postgresql:
   service:
     port: 5432
 
+# Configuration values for rabbitmq and celery
+celery:
+  enabled: true
+  service:
+    port: 5672
+  replicaCount: 5
+
 serviceAccount:
   create: true
   name: "dagit-admin"

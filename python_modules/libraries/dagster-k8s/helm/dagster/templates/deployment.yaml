@@ -1,11 +1,11 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "dagster.dagit.fullname" . }}
+  name: {{ include "dagster.workers.fullname" . }}
   labels:
     {{- include "dagster.labels" . | nindent 4 }}
 spec:
-  replicas: {{ .Values.replicaCount }}
+  replicas: {{ .Values.celery.replicaCount }}
   selector:
     matchLabels:
       {{- include "dagster.selectorLabels" . | nindent 6 }}
@@ -37,8 +37,7 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           imagePullPolicy: {{ .Values.imagePullPolicy }}
           image: "{{ .Values.dagit.image }}"
-          command: ["dagit"]
-          args: ["-p", "80", "-h", "0.0.0.0"]
+          command: ["dagster-celery start"]
           env:
           - name: DAGSTER_HOME
             value: "/opt/dagster/dagster_home"
@@ -46,10 +45,10 @@ spec:
             - name: dagster-instance
               mountPath: "/opt/dagster/dagster_home/dagster.yaml"
               subPath: dagster.yaml
-          ports:
-            - name: http
-              containerPort: 80
-              protocol: TCP
+          # ports:
+          #   - name: http
+          #     containerPort: 80
+          #     protocol: TCP
           livenessProbe:
             httpGet:
               path: /
