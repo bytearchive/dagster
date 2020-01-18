@@ -193,7 +193,14 @@ class ConfigurableClassData(
                 ConfigurableClass,
             )
 
-        config_dict = yaml.load(self.config_yaml)
+        config_dict = yaml.safe_load(self.config_yaml)
+        if yaml.dump(yaml.safe_load(self.config_yaml)) != yaml.dump(yaml.load(self.config_yaml)):
+            raise Exception(
+                'safe:\n{a}\n\n\nload:\n{b}'.format(
+                    a=yaml.safe_load(self.config_yaml), b=yaml.load(self.config_yaml)
+                ),
+            )
+
         result = process_config(resolve_to_config_type(klass.config_type()), config_dict)
         if not result.success:
             raise DagsterInvalidConfigError(
